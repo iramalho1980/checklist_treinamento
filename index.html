@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo da Implantação - Thomson Reuters</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(to right, #19547b, #ffd89b);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-color: #ffffff;
+            --accent-color: #3498db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-color);
+            padding: 20px 20px 100px 20px;
+            transition: background 0.5s ease;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 300;
+            font-size: 1.6rem;
+        }
+
+        .info-display {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Modal Styles */
+        #initModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 400px;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 25px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .modal-content input {
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Batch Fill Utility */
+        .batch-fill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .batch-fill span {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .batch-fill select {
+            width: auto;
+            min-width: 180px;
+        }
+
+        /* Accordion Styles */
+        .accordion-item {
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .accordion-header:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .accordion-header h2 {
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease;
+            padding: 0 20px;
+        }
+
+        .accordion-item.active .accordion-content {
+            max-height: 3000px;
+            padding: 20px;
+        }
+
+        .accordion-item.active .accordion-header i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        /* Table Styles */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 10px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .table-wrapper::-webkit-scrollbar { height: 10px; }
+        .table-wrapper::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        .table-wrapper::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            min-width: 180px;
+            line-height: 1.4;
+        }
+
+        td:first-child, th:first-child {
+            position: sticky;
+            left: 0;
+            background: rgba(25, 25, 25, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            min-width: 180px;
+            border-right: 1px solid var(--glass-border);
+        }
+
+        select, input, textarea {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        select option { background: #1a252f; color: white; }
+
+        /* Floating Skin Selector */
+        .skin-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1001;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .skin-fab:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .skin-menu {
+            position: fixed;
+            bottom: 95px;
+            right: 30px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            padding: 15px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .skin-circle {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: 0.2s;
+        }
+
+        .skin-circle:hover { transform: scale(1.2); border-color: white; }
+        .skin-circle.active { border-color: white; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(45deg, #2980b9, #3498db);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        .btn-add {
+            background: rgba(39, 174, 96, 0.2);
+            color: white;
+            border: 1px solid rgba(39, 174, 96, 0.4);
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .btn-remove {
+            background: rgba(192, 57, 43, 0.2);
+            color: white;
+            border: 1px solid rgba(192, 57, 43, 0.4);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            font-size: 1.2rem;
+        }
+
+        .particularidade-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr auto;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .particularidade-row { grid-template-columns: 1fr; }
+            .skin-fab { bottom: 20px; right: 20px; }
+            .skin-menu { right: 20px; bottom: 85px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Popup Inicial -->
+    <div id="initModal">
+        <div class="modal-content glass">
+            <h2><i class="fas fa-building"></i> Identificação</h2>
+            <input type="text" id="escritorioInput" placeholder="Nome do Escritório" required>
+            <input type="date" id="dataInput" required>
+            <button class="btn-primary" onclick="confirmInit()">INICIAR RELATÓRIO</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="glass">
+            <h1>Resumo da Implantação</h1>
+            <div id="headerInfo" class="info-display"></div>
+        </header>
+
+        <form id="implantacaoForm">
+            <!-- Quadro 1: Andamento -->
+            <div class="accordion-item glass">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h2><i class="fas fa-tasks"></i> ANDAMENTO DA IMPLANTAÇÃO</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="accordion-content">
+                    <!-- Utilitário de Preenchimento em Lote -->
+                    <div class="batch-fill">
+                        <span><i class="fas fa-magic"></i> Preencher em Lote:</span>
+                        <select id="batchSelect" onchange="applyBatchFill(this.value)">
+                            <option value="">Selecionar Opção...</option>
+                            <option value="Nenhuma">Nenhuma</option>
+                            <option value="Algumas">Algumas</option>
+                            <option value="Todas">Todas</option>
+                            <option value="Não possui">Não possui</option>
+                        </select>
+                        <small>(Aplica a todas as colunas de progresso)</small>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table id="tabelaAndamento">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Empresa</th>
+                                    <th>Empresas Cadastradas<br>no Sistema foi realizado</th>
+                                    <th>Perfil de Empresas<br>Importado foi realizado</th>
+                                    <th>Plano de Contas<br>Ajustado foi realizado</th>
+                                    <th>Balanço de Abertura<br>Inserido foi realizado</th>
+                                    <th>Lançamentos Contábeis<br>foi realizado</th>
+                                    <th>Extrato Bancário<br>Importado foi realizado</th>
+                                    <th>Lançamentos Excel<br>Importados foi realizado</th>
+                                    <th>Encerramento<br>foi realizado</th>
+                                    <th>Informativos<br>Gerados foi realizado</th>
+                                    <th>Demonstrativos<br>Gerados foi realizado</th>
+                                    <th>Fechamento Contábil<br>na Domínio foi realizado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoAndamento">
+                                <!-- JS will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quadro 2: Particularidades -->
+            <div class="accordion-item glass">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h2><i class="fas fa-info-circle"></i> PARTICULARIDADES DA CONTABILIDADE</h2>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="accordion-content">
+                    <div id="particularidadesContainer">
+                        <div class="particularidade-row">
+                            <input type="text" placeholder="Nome da Empresa" class="p-nome">
+                            <select class="p-regime">
+                                <option value="Simples Nacional">Simples Nacional</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Lucro Presumido">Lucro Presumido</option>
+                                <option value="Lucro Real">Lucro Real</option>
+                                <option value="Terceiro Setor">Terceiro Setor</option>
+                                <option value="Outras">Outras</option>
+                            </select>
+                            <textarea placeholder="Particularidade Contábil" class="p-obs" rows="1"></textarea>
+                            <button type="button" class="btn-remove" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add" onclick="addParticularidade()">
+                        <i class="fas fa-plus"></i> Adicionar Empresa
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit btn-primary">ENVIAR RELATÓRIO</button>
+        </form>
+    </div>
+
+    <!-- Floating Skin Selector -->
+    <div class="skin-fab glass" onclick="toggleSkinMenu()">
+        <i class="fas fa-palette" style="font-size: 1.5rem;"></i>
+    </div>
+    <div id="skinMenu" class="skin-menu glass">
+        <div class="skin-circle active" style="background: linear-gradient(to right, #19547b, #ffd89b);" onclick="setSkin(0, this)"></div>
+        <div class="skin-circle" style="background: linear-gradient(to right, #004e92, #000428);" onclick="setSkin(1, this)"></div>
+        <div class="skin-circle" style="background: linear-gradient(to right, #237A57, #093028);" onclick="setSkin(2, this)"></div>
+        <div class="skin-circle" style="background: linear-gradient(to right, #283E51, #4B79A1);" onclick="setSkin(3, this)"></div>
+        <div class="skin-circle" style="background: linear-gradient(to right, #2C5364, #203A43, #0F2027);" onclick="setSkin(4, this)"></div>
+        <div class="skin-circle" style="background: linear-gradient(to right, #3498db, #2c3e50);" onclick="setSkin(5, this)"></div>
+    </div>
+
+    <script>
+        let escritorio = "";
+        let dataRelatorio = "";
+
+        const skins = [
+            "linear-gradient(to right, #19547b, #ffd89b)",
+            "linear-gradient(to right, #004e92, #000428)",
+            "linear-gradient(to right, #237A57, #093028)",
+            "linear-gradient(to right, #283E51, #4B79A1)",
+            "linear-gradient(to right, #2C5364, #203A43, #0F2027)",
+            "linear-gradient(to right, #3498db, #2c3e50)"
+        ];
+
+        const tiposEmpresa = ["Simples Nacional", "Mei", "Lucro Presumido", "Lucro Real", "Terceiro Setor", "Outras"];
+        const colunas = ["cadastradas", "perfil", "plano", "balanco", "lancamentos", "extrato", "excel", "encerramento", "informativos", "demonstrativos", "dominio"];
+        const opcoesCombo = ["Nenhuma", "Algumas", "Todas", "Não possui"];
+
+        function confirmInit() {
+            escritorio = document.getElementById('escritorioInput').value;
+            dataRelatorio = document.getElementById('dataInput').value;
+            
+            if (!escritorio || !dataRelatorio) {
+                alert("Por favor, preencha o nome do escritório e a data.");
+                return;
+            }
+
+            const dataFormatada = dataRelatorio.split('-').reverse().join('/');
+            document.getElementById('headerInfo').innerHTML = `<strong>Escritório:</strong> ${escritorio} | <strong>Data:</strong> ${dataFormatada}`;
+            document.getElementById('initModal').style.display = 'none';
+        }
+
+        function init() {
+            const tbody = document.getElementById('corpoAndamento');
+            tiposEmpresa.forEach(tipo => {
+                const tr = document.createElement('tr');
+                let html = `<td><strong>${tipo}</strong></td>`;
+                colunas.forEach(col => {
+                    html += `<td>
+                        <select class="status-select" name="${tipo.replace(/\s/g, '_')}_${col}">
+                            ${opcoesCombo.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                    </td>`;
+                });
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('dataInput').valueAsDate = new Date();
+        }
+
+        function applyBatchFill(value) {
+            if (!value) return;
+            const selects = document.querySelectorAll('.status-select');
+            selects.forEach(sel => sel.value = value);
+        }
+
+        function toggleAccordion(header) {
+            header.parentElement.classList.toggle('active');
+        }
+
+        function toggleSkinMenu() {
+            const menu = document.getElementById('skinMenu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function setSkin(index, element) {
+            document.body.style.background = skins[index];
+            document.querySelectorAll('.skin-circle').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            toggleSkinMenu();
+        }
+
+        function addParticularidade() {
+            const container = document.getElementById('particularidadesContainer');
+            const div = document.createElement('div');
+            div.className = 'particularidade-row';
+            div.innerHTML = `
+                <input type="text" placeholder="Nome da Empresa" class="p-nome">
+                <select class="p-regime">
+                    <option value="Simples Nacional">Simples Nacional</option>
+                    <option value="Mei">Mei</option>
+                    <option value="Lucro Presumido">Lucro Presumido</option>
+                    <option value="Lucro Real">Lucro Real</option>
+                    <option value="Terceiro Sector">Terceiro Setor</option>
+                    <option value="Outras">Outras</option>
+                </select>
+                <textarea placeholder="Particularidade Contábil" class="p-obs" rows="1"></textarea>
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        document.getElementById('implantacaoForm').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const dataFormatada = dataRelatorio.split('-').reverse().join('/');
+            let corpoEmail = `RESUMO DA IMPLANTAÇÃO\n`;
+            corpoEmail += `Escritório: ${escritorio}\n`;
+            corpoEmail += `Data: ${dataFormatada}\n`;
+            corpoEmail += `====================================\n\n`;
+            
+            corpoEmail += `1. ANDAMENTO DA IMPLANTAÇÃO\n`;
+            corpoEmail += `------------------------------------\n`;
+            
+            const rows = document.querySelectorAll('#corpoAndamento tr');
+            rows.forEach(row => {
+                const tipo = row.cells[0].innerText;
+                corpoEmail += `\n[${tipo}]\n`;
+                const selects = row.querySelectorAll('select');
+                selects.forEach((sel, idx) => {
+                    const label = document.querySelectorAll('#tabelaAndamento th')[idx + 1].innerText.replace(/\n/g, ' ');
+                    corpoEmail += `  - ${label}: ${sel.value}\n`;
+                });
+            });
+
+            corpoEmail += `\n\n2. PARTICULARIDADES DA CONTABILIDADE\n`;
+            corpoEmail += `------------------------------------\n`;
+            
+            const pRows = document.querySelectorAll('.particularidade-row');
+            pRows.forEach((row, idx) => {
+                const nome = row.querySelector('.p-nome').value || "N/A";
+                const regime = row.querySelector('.p-regime').value;
+                const obs = row.querySelector('.p-obs').value || "Sem observações";
+                corpoEmail += `\nEmpresa ${idx + 1}:\n`;
+                corpoEmail += `  Nome: ${nome}\n`;
+                corpoEmail += `  Regime: ${regime}\n`;
+                corpoEmail += `  Particularidade: ${obs}\n`;
+            });
+
+            const subject = encodeURIComponent(`Resumo da Implantação | Escritório: ${escritorio} | Data: ${dataFormatada}`);
+            const body = encodeURIComponent(corpoEmail);
+            const mailtoLink = `mailto:ivan.ramalho@thomsonreuters.com?subject=${subject}&body=${body}`;
+            
+            window.location.href = mailtoLink;
+            alert("O seu cliente de e-mail será aberto com o assunto e corpo formatados.");
+        };
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.skin-fab') && !event.target.closest('.skin-menu')) {
+                document.getElementById('skinMenu').style.display = 'none';
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
